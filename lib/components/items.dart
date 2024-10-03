@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Lista_Compras_Flutter/components/shopping_list.dart';
 import 'package:Lista_Compras_Flutter/data/items_dao.dart';
 import '../data/shoppinglist_dao.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 class Items extends StatefulWidget {
   final int? idItem;
@@ -41,9 +42,24 @@ class _ItemsState extends State<Items> {
     _valorController.text = valorUnitario.toStringAsFixed(2);
   }
 
+  @override
+  void didUpdateWidget(covariant Items oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.qtdItem != oldWidget.qtdItem ||
+        widget.valorItem != oldWidget.valorItem ||
+        widget.valorTotalItem != oldWidget.valorTotalItem) {
+      setState(() {
+        quantidade = widget.qtdItem;
+        valorUnitario = widget.valorItem;
+        valorTotal = widget.valorTotalItem;
+        _valorController.text = valorUnitario.toStringAsFixed(2);
+      });
+    }
+  }
+
   String formatarValor(double valorTotal) {
     final NumberFormat formato =
-        NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     return formato.format(valorTotal);
   }
 
@@ -151,7 +167,7 @@ class _ItemsState extends State<Items> {
                   decoration: const InputDecoration(labelText: 'Quantidade'),
                   keyboardType: TextInputType.number,
                   controller:
-                      TextEditingController(text: novaQuantidade.toString()),
+                  TextEditingController(text: novaQuantidade.toString()),
                   onChanged: (value) {
                     novaQuantidade = int.tryParse(value) ?? novaQuantidade;
                   },
@@ -160,15 +176,23 @@ class _ItemsState extends State<Items> {
                 // Campo para editar o valor unitário
                 TextField(
                   decoration:
-                      const InputDecoration(labelText: 'Valor Unitário'),
+                  const InputDecoration(labelText: 'Valor Unitário'),
                   keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    CurrencyInputFormatter(
+                      leadingSymbol: 'R\$',
+                      useSymbolPadding: true,
+                      thousandSeparator: ThousandSeparator.Period,
+                      mantissaLength: 2,
+                    ),
+                  ],
                   controller: TextEditingController(
-                      text: novoValorUnitario
-                          .toStringAsFixed(2)
-                          .replaceAll('.', ',')),
+                      text: formatarValor(novoValorUnitario)),
                   onChanged: (value) {
-                    double? parsed = double.tryParse(value);
+                    value = value.replaceFirst('R\$ ', '');
+                    value = value.replaceAll('.', '');
+                    double? parsed = double.tryParse(value.replaceAll(',', '.'));
                     if (parsed != null && parsed > 0) {
                       novoValorUnitario = parsed;
                     } else {
@@ -324,7 +348,7 @@ class _ItemsState extends State<Items> {
               child: Text(
                 formatarValor(valorTotal),
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.end,
               ),
             ),

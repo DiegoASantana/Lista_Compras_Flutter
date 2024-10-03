@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:Lista_Compras_Flutter/components/items.dart';
 import 'package:Lista_Compras_Flutter/data/items_dao.dart';
@@ -130,7 +131,9 @@ class _ListScreenState extends State<ListScreen> {
                       item.valorItem,
                       item.valorTotalItem,
                       onUpdate: () {
+                        print('entrou no onUpdate');
                         setState(() {
+                          print('entrou no setState');
                           _loadItems();
                         });
                       },
@@ -206,7 +209,15 @@ class _ListScreenState extends State<ListScreen> {
                             const InputDecoration(labelText: 'Valor Unitário'),
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
+                        inputFormatters: [
+                          CurrencyInputFormatter(
+                            leadingSymbol: 'R\$',
+                            useSymbolPadding: true,
+                            thousandSeparator: ThousandSeparator.Period,
+                          ),
+                        ],
                         onChanged: (value) {
+                          value = value.replaceFirst('R\$ ', '');
                           value = value.replaceAll('.', '');
                           valorItem =
                               double.tryParse(value.replaceAll(',', '.')) ??
