@@ -40,6 +40,7 @@ class _ListScreenState extends State<ListScreen> {
 
   // Método para adicionar um novo item
   Future<void> _addItem(String nome, int qtd, double valor) async {
+    final int orderItem = await ItemsDao().findOrderItemMax(widget.idList);
     final int qtdItemsAtualizado;
     Items newItem = Items(
       null,
@@ -48,6 +49,7 @@ class _ListScreenState extends State<ListScreen> {
       qtd,
       valor,
       qtd * valor,
+      orderItem,
     );
     await ItemsDao().save(newItem);
 
@@ -130,6 +132,7 @@ class _ListScreenState extends State<ListScreen> {
                       item.qtdItem,
                       item.valorItem,
                       item.valorTotalItem,
+                      item.orderItem,
                       onUpdate: () {
                         print('entrou no onUpdate');
                         setState(() {

@@ -13,11 +13,12 @@ class Items extends StatefulWidget {
   final int qtdItem;
   final double valorItem;
   final double valorTotalItem;
+  final int orderItem;
   final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
 
   const Items(this.idItem, this.idList, this.nomeItem, this.qtdItem,
-      this.valorItem, this.valorTotalItem,
+      this.valorItem, this.valorTotalItem, this.orderItem,
       {super.key, this.onUpdate, this.onDelete});
 
   @override
@@ -59,7 +60,7 @@ class _ItemsState extends State<Items> {
 
   String formatarValor(double valorTotal) {
     final NumberFormat formato =
-    NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+        NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     return formato.format(valorTotal);
   }
 
@@ -77,19 +78,18 @@ class _ItemsState extends State<Items> {
   }
 
   Future<void> _updateItem() async {
-    Items updatedItem = Items(
-      widget.idItem,
-      widget.idList,
-      widget.nomeItem,
-      quantidade,
-      valorUnitario,
-      valorUnitario * quantidade,
-    );
-
-    await ItemsDao().save(updatedItem);
-    if (widget.onUpdate != null) {
-      widget.onUpdate!();
-    }
+    ItemsDao().update(
+      widget.idItem!,
+      aNameItem: widget.nomeItem,
+      aQtdItem: quantidade,
+      aValueUnit: valorUnitario,
+      aValueTotal: valorUnitario * quantidade,
+      aOrdemItem: widget.orderItem,
+    ).then((_) {
+      if (widget.onUpdate != null) {
+        widget.onUpdate!();
+      }
+    });
   }
 
   void _incrementQuantity() {
@@ -167,7 +167,7 @@ class _ItemsState extends State<Items> {
                   decoration: const InputDecoration(labelText: 'Quantidade'),
                   keyboardType: TextInputType.number,
                   controller:
-                  TextEditingController(text: novaQuantidade.toString()),
+                      TextEditingController(text: novaQuantidade.toString()),
                   onChanged: (value) {
                     novaQuantidade = int.tryParse(value) ?? novaQuantidade;
                   },
@@ -176,9 +176,9 @@ class _ItemsState extends State<Items> {
                 // Campo para editar o valor unitário
                 TextField(
                   decoration:
-                  const InputDecoration(labelText: 'Valor Unitário'),
+                      const InputDecoration(labelText: 'Valor Unitário'),
                   keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     CurrencyInputFormatter(
                       leadingSymbol: 'R\$',
@@ -192,7 +192,8 @@ class _ItemsState extends State<Items> {
                   onChanged: (value) {
                     value = value.replaceFirst('R\$ ', '');
                     value = value.replaceAll('.', '');
-                    double? parsed = double.tryParse(value.replaceAll(',', '.'));
+                    double? parsed =
+                        double.tryParse(value.replaceAll(',', '.'));
                     if (parsed != null && parsed > 0) {
                       novoValorUnitario = parsed;
                     } else {
@@ -214,15 +215,16 @@ class _ItemsState extends State<Items> {
               onPressed: () async {
                 if (novoNome.isNotEmpty && novaQuantidade > 0) {
                   // Atualiza o item com os novos valores
-                  Items updatedItem = Items(
-                    widget.idItem,
-                    widget.idList,
-                    novoNome,
-                    novaQuantidade,
-                    novoValorUnitario,
-                    novaQuantidade * novoValorUnitario,
-                  );
-                  await ItemsDao().save(updatedItem).then((_) {
+                  await ItemsDao()
+                      .update(
+                    widget.idItem!,
+                    aNameItem: novoNome,
+                    aQtdItem: novaQuantidade,
+                    aValueUnit: novoValorUnitario,
+                    aValueTotal: novaQuantidade * novoValorUnitario,
+                    aOrdemItem: widget.orderItem,
+                  )
+                      .then((_) {
                     if (widget.onUpdate != null) {
                       widget.onUpdate!();
                     }
@@ -348,7 +350,7 @@ class _ItemsState extends State<Items> {
               child: Text(
                 formatarValor(valorTotal),
                 style:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.end,
               ),
             ),
