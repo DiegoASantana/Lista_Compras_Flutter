@@ -110,36 +110,6 @@ class _ItemsState extends State<Items> {
     }
   }
 
-  Future<void> _showOptions() async {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.edit, color: Colors.blue),
-                title: const Text('Editar'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditDialog();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Excluir'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _confirmDelete();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _showEditDialog() async {
     String novoNome = widget.nomeItem;
     int novaQuantidade = quantidade;
@@ -295,67 +265,87 @@ class _ItemsState extends State<Items> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: _showOptions, // Detecta o long press
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            bottom: BorderSide(color: Colors.black, width: 2),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.black, width: 2),
+        ),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          // Nome do Item
+          Expanded(
+            flex: 3,
+            child: Text(
+              widget.nomeItem,
+              style: const TextStyle(
+                  fontSize: 20, overflow: TextOverflow.ellipsis),
+            ),
           ),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          children: [
-            // Nome do Item
-            Expanded(
-              flex: 3,
-              child: Text(
-                widget.nomeItem,
-                style: const TextStyle(
-                    fontSize: 20, overflow: TextOverflow.ellipsis),
-              ),
-            ),
-            SizedBox(
-              width: 130,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.remove,
-                      size: 16,
-                    ),
-                    onPressed: _decrementQuantity,
+          SizedBox(
+            width: 130,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.remove,
+                    size: 16,
                   ),
-                  Text(
-                    '$quantidade',
-                    style: const TextStyle(fontSize: 16),
+                  onPressed: _decrementQuantity,
+                ),
+                Text(
+                  '$quantidade',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.add,
+                    size: 16,
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.add,
-                      size: 16,
-                    ),
-                    onPressed: _incrementQuantity,
-                  ),
-                ],
-              ),
+                  onPressed: _incrementQuantity,
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            // Valor Total
-            SizedBox(
-              width: 90,
-              child: Text(
-                formatarValor(valorTotal),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.end,
-              ),
+          ),
+          const SizedBox(width: 10),
+          // Valor Total
+          SizedBox(
+            width: 90,
+            child: Text(
+              formatarValor(valorTotal),
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.end,
             ),
-          ],
-        ),
+          ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),  // Ícone de três pontinhos
+            onSelected: (String result) {
+              // Ação quando uma opção for selecionada
+              if (result == 'Editar') {
+                print("Opção 1 selecionada");
+                _showEditDialog();
+              } else if (result == 'Remover') {
+                print("Opção 2 selecionada");
+                _confirmDelete();
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'Editar',
+                child: Text('Editar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Remover',
+                child: Text('Remover'),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }

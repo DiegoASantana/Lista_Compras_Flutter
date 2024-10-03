@@ -77,6 +77,33 @@ class _ListScreenState extends State<ListScreen> {
     return allItems.fold(0.0, (sum, item) => sum + (item.valorTotalItem));
   }
 
+  Future<void> _reorderItems(int oldIndex, int newIndex) async {
+    setState(() {
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+
+      // Move o item dentro da lista localmente
+      final item = allItems.removeAt(oldIndex);
+      allItems.insert(newIndex, item);
+    });
+
+    final itemsDao = ItemsDao();
+
+    // Atualiza a ordem dos itens no banco de dados
+    for (int i = 0; i < allItems.length; i++) {
+      final item = allItems[i];
+      // Atualiza o campo ITM_OrderItem com base no novo índice
+      await itemsDao.update(
+        item.idItem!,
+        aOrdemItem: i + 1, // A nova ordem do item será seu índice + 1
+      );
+    }
+
+    // Recarrega os itens após a atualização
+    _loadItems();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +128,7 @@ class _ListScreenState extends State<ListScreen> {
       body: Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 70),
         child: Container(
-          color: Colors.black12,
+          color: Colors.white30,
           width: double.infinity,
           height: double.infinity,
           child: (allItems.isEmpty)
@@ -121,11 +148,12 @@ class _ListScreenState extends State<ListScreen> {
                     ],
                   ),
                 )
-              : ListView.builder(
+              : ReorderableListView.builder(
                   itemCount: allItems.length,
                   itemBuilder: (BuildContext context, int index) {
                     final Items item = allItems[index];
                     return Items(
+                      key: Key('$index'),
                       item.idItem,
                       item.idList,
                       item.nomeItem,
@@ -148,6 +176,7 @@ class _ListScreenState extends State<ListScreen> {
                       },
                     );
                   },
+            onReorder: _reorderItems,
                 ),
         ),
       ),
