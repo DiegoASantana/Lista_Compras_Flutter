@@ -110,6 +110,15 @@ class _ItemsState extends State<Items> {
     }
   }
 
+  Future<void> _showDialogNameItem() async{
+    String nomeItemCompleto = widget.nomeItem;
+    showDialog(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(nomeItemCompleto),
+      );
+    });
+  }
+
   Future<void> _showEditDialog() async {
     String novoNome = widget.nomeItem;
     int novaQuantidade = quantidade;
@@ -127,6 +136,7 @@ class _ItemsState extends State<Items> {
                 TextField(
                   decoration: const InputDecoration(labelText: 'Nome do Item'),
                   controller: TextEditingController(text: novoNome),
+                  textCapitalization: TextCapitalization.sentences,
                   onChanged: (value) {
                     novoNome = value;
                   },
@@ -278,10 +288,14 @@ class _ItemsState extends State<Items> {
           // Nome do Item
           Expanded(
             flex: 3,
-            child: Text(
-              widget.nomeItem,
-              style: const TextStyle(
-                  fontSize: 20, overflow: TextOverflow.ellipsis),
+            child: InkWell(
+              onTap: _showDialogNameItem,
+              child: Text(
+                widget.nomeItem,
+                style: const TextStyle(
+                    fontSize: 20, overflow: TextOverflow.ellipsis),
+                maxLines: 3,
+              ),
             ),
           ),
           SizedBox(
@@ -311,7 +325,6 @@ class _ItemsState extends State<Items> {
               ],
             ),
           ),
-          const SizedBox(width: 10),
           // Valor Total
           SizedBox(
             width: 90,

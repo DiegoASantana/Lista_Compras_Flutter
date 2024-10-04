@@ -89,6 +89,7 @@ class _FormNewlistState extends State<FormNewlist> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextFormField(
+                        textCapitalization: TextCapitalization.sentences,
                         keyboardType: TextInputType.text,
                         controller: nameListController,
                         validator: (value) {

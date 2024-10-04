@@ -176,7 +176,7 @@ class _ListScreenState extends State<ListScreen> {
                       },
                     );
                   },
-            onReorder: _reorderItems,
+                  onReorder: _reorderItems,
                 ),
         ),
       ),
@@ -206,6 +206,7 @@ class _ListScreenState extends State<ListScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         onPressed: () {
+          FocusNode nomeItemFocusNode = FocusNode();
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -213,10 +214,14 @@ class _ListScreenState extends State<ListScreen> {
               int quantidadeItem = 1;
               double valorItem = 0.0;
 
-              return SingleChildScrollView(
-                child: AlertDialog(
-                  title: const Text('Adicionar Item'),
-                  content: Column(
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                FocusScope.of(context).requestFocus(nomeItemFocusNode);
+              });
+
+              return AlertDialog(
+                title: const Text('Adicionar Item'),
+                content: SingleChildScrollView(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
@@ -225,6 +230,8 @@ class _ListScreenState extends State<ListScreen> {
                         onChanged: (value) {
                           nomeItem = value;
                         },
+                        textCapitalization: TextCapitalization.sentences,
+                        focusNode: nomeItemFocusNode,
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -258,31 +265,31 @@ class _ListScreenState extends State<ListScreen> {
                       ),
                     ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        if (nomeItem.isNotEmpty && quantidadeItem > 0) {
-                          _addItem(nomeItem, quantidadeItem, valorItem);
-                          Navigator.pop(context,
-                              true); // Retorna um resultado para indicar a atualização
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Preencha todos os campos corretamente')),
-                          );
-                        }
-                      },
-                      child: const Text('Salvar'),
-                    ),
-                  ],
                 ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (nomeItem.isNotEmpty && quantidadeItem > 0) {
+                        _addItem(nomeItem, quantidadeItem, valorItem);
+                        Navigator.pop(context,
+                            true); // Retorna um resultado para indicar a atualização
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Preencha todos os campos corretamente')),
+                        );
+                      }
+                    },
+                    child: const Text('Salvar'),
+                  ),
+                ],
               );
             },
           );

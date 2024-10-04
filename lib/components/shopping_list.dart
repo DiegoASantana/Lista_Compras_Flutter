@@ -116,6 +116,7 @@ class _ShoppingListState extends State<ShoppingList> {
                   children: [
                     // Campo para editar o nome da lista
                     TextField(
+                      textCapitalization: TextCapitalization.sentences,
                       decoration:
                           const InputDecoration(labelText: 'Nome da Lista'),
                       controller: TextEditingController(text: novoNomeLista),
@@ -208,7 +209,8 @@ class _ShoppingListState extends State<ShoppingList> {
                           .update(widget.idList!,
                               newName: novoNomeLista,
                               newDateHours: formattedDate,
-                              newColor: novaCor!)
+                              newColor: novaCor!,
+                              newImage: novaFoto)
                           .then((_) {
                         if (widget.onUpdateList != null) {
                           widget.onUpdateList!();

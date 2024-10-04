@@ -46,7 +46,8 @@ class ShoppingListDao {
       {int? newQty,
       String? newName,
       int? newColor,
-      String? newDateHours}) async {
+      String? newDateHours,
+      String? newImage}) async {
     final Database bancoDados = await getDataBase();
 
     // Cria uma lista para armazenar os valores a serem atualizados
@@ -78,6 +79,11 @@ class ShoppingListDao {
       if (!isFirst) query.write(', ');
       query.write('$_dateHours = ?');
       values.add(newDateHours);
+    }
+    if (newImage != null) {
+      if (!isFirst) query.write(', ');
+      query.write('$_image = ?');
+      values.add(newImage);
     }
 
     // Verifica se pelo menos um campo foi passado
