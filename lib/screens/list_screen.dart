@@ -39,7 +39,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   // Método para adicionar um novo item
-  Future<void> _addItem(String nome, int qtd, double valor) async {
+  Future<void> _addItem(String nome, double qtd, double valor) async {
     final int orderItem = await ItemsDao().findOrderItemMax(widget.idList);
     final int qtdItemsAtualizado;
     Items newItem = Items(
@@ -104,6 +104,55 @@ class _ListScreenState extends State<ListScreen> {
     _loadItems();
   }
 
+  Future<void> _confirmZerar(int aIdParam) async {
+    String msg = '';
+    String msgSnackBar = '';
+    if (aIdParam == 1){
+      msg = 'Deseja zerar todos os Valores?';
+      msgSnackBar = 'Zerando todos os valores...';
+    } if (aIdParam == 2){
+      msg = 'Deseja zerar todas as Quantidades?';
+      msgSnackBar = 'Zerando todas as quantidades...';
+    }else if (aIdParam == 3){
+      msg = 'Deseja zerar todos Valores e todas as Quantidades?';
+      msgSnackBar = 'Zerando todos os valores e quantidades';
+    }
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Zerar'),
+          content: Text(msg),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false); // Não confirma
+              },
+              child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true); // Confirma
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msgSnackBar)),
+                );
+              },
+              child: const Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await ItemsDao().updateZeraValuesByIdList(widget.idList, aIdParam).then((_) {
+        setState(() {
+          _loadItems();
+        });
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,13 +164,32 @@ class _ListScreenState extends State<ListScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, size: 30),
-            onPressed: () {
-              setState(() {
-                _loadItems();
-              });
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),  // Ícone de três pontinhos
+            onSelected: (String result) {
+              // Ação quando uma opção for selecionada
+              if (result == 'Zerar Valores') {
+                _confirmZerar(1);
+              } else if (result == 'Zerar Quantidade') {
+                _confirmZerar(2);
+              } else if (result == 'Zerar Tudo') {
+                _confirmZerar(3);
+              }
             },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'Zerar Valores',
+                child: Text('Zerar Valores'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Zerar Quantidade',
+                child: Text('Zerar Quantidade'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Zerar Tudo',
+                child: Text('Zerar Tudo'),
+              ),
+            ],
           )
         ],
       ),
@@ -162,9 +230,7 @@ class _ListScreenState extends State<ListScreen> {
                       item.valorTotalItem,
                       item.orderItem,
                       onUpdate: () {
-                        print('entrou no onUpdate');
                         setState(() {
-                          print('entrou no setState');
                           _loadItems();
                         });
                       },
@@ -211,7 +277,7 @@ class _ListScreenState extends State<ListScreen> {
             context: context,
             builder: (BuildContext context) {
               String nomeItem = '';
-              int quantidadeItem = 1;
+              double quantidadeItem = 1;
               double valorItem = 0.0;
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -239,7 +305,7 @@ class _ListScreenState extends State<ListScreen> {
                             const InputDecoration(labelText: 'Quantidade'),
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
-                          quantidadeItem = int.tryParse(value) ?? 1;
+                          quantidadeItem = double.tryParse(value) ?? 1;
                         },
                       ),
                       const SizedBox(height: 8),

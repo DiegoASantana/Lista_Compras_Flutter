@@ -7,7 +7,7 @@ class ItemsDao {
       '$_idItem INTEGER PRIMARY KEY AUTOINCREMENT, '
       '$_idList INTEGER, ' // Foreign Key para ShoppingList
       '$_item TEXT NOT NULL, '
-      '$_qty INTEGER NOT NULL, '
+      '$_qty REAL NOT NULL, '
       '$_value REAL, '
       '$_totalValue REAL, '
       '$_orderItem INTEGER NOT NULL, '
@@ -67,7 +67,6 @@ class ItemsDao {
 
     // Retorna o Max + 1 do campo OrderItem
     int maxIncrement = Sqflite.firstIntValue(result) ?? 1;
-    print(maxIncrement);
     return maxIncrement;
   }
 
@@ -89,9 +88,31 @@ class ItemsDao {
     );
   }
 
+  updateZeraValuesByIdList(int aIdList, aIdParams) async {
+    final Database bancoDados = await getDataBase();
+    final List<Object?> values = [];
+    final StringBuffer query = StringBuffer('UPDATE $_tableName SET ');
+
+    if(aIdParams == 1){
+      query.write('$_value = 0, $_totalValue = 0');
+    }else if(aIdParams == 2){
+      query.write('$_qty = 0, $_totalValue = 0');
+    }else if(aIdParams == 3){
+      query.write('$_value = 0, $_qty = 0, $_totalValue = 0');
+    }
+
+    query.write(' WHERE $_idList = ?');
+    values.add(aIdList);
+
+    return await bancoDados.rawUpdate(
+      query.toString(),
+      values, // Define os parâmetros para evitar injeção de SQL
+    );
+  }
+
   Future<int> update(int aIdItem,
       {String? aNameItem,
-      int? aQtdItem,
+      double? aQtdItem,
       double? aValueUnit,
       double? aValueTotal,
       int? aOrdemItem}) async {

@@ -10,7 +10,7 @@ class Items extends StatefulWidget {
   final int? idItem;
   final int idList;
   final String nomeItem;
-  final int qtdItem;
+  final double qtdItem;
   final double valorItem;
   final double valorTotalItem;
   final int orderItem;
@@ -27,7 +27,7 @@ class Items extends StatefulWidget {
 
 class _ItemsState extends State<Items> {
   String nomeLista = 'Carregando...';
-  late int quantidade;
+  late double quantidade;
   late double valorUnitario;
   late double valorTotal;
 
@@ -78,14 +78,16 @@ class _ItemsState extends State<Items> {
   }
 
   Future<void> _updateItem() async {
-    ItemsDao().update(
+    ItemsDao()
+        .update(
       widget.idItem!,
       aNameItem: widget.nomeItem,
       aQtdItem: quantidade,
       aValueUnit: valorUnitario,
       aValueTotal: valorUnitario * quantidade,
       aOrdemItem: widget.orderItem,
-    ).then((_) {
+    )
+        .then((_) {
       if (widget.onUpdate != null) {
         widget.onUpdate!();
       }
@@ -110,19 +112,23 @@ class _ItemsState extends State<Items> {
     }
   }
 
-  Future<void> _showDialogNameItem() async{
+  Future<void> _showDialogNameItem() async {
     String nomeItemCompleto = widget.nomeItem;
-    showDialog(context: context, builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(nomeItemCompleto),
-      );
-    });
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(nomeItemCompleto),
+          );
+        });
   }
 
   Future<void> _showEditDialog() async {
     String novoNome = widget.nomeItem;
-    int novaQuantidade = quantidade;
+    double novaQuantidade = quantidade;
     double novoValorUnitario = valorUnitario;
+
+
 
     showDialog(
       context: context,
@@ -147,9 +153,9 @@ class _ItemsState extends State<Items> {
                   decoration: const InputDecoration(labelText: 'Quantidade'),
                   keyboardType: TextInputType.number,
                   controller:
-                      TextEditingController(text: novaQuantidade.toString()),
+                      TextEditingController(text: '${(novaQuantidade % 1 == 0) ? novaQuantidade.toInt() : novaQuantidade}'),
                   onChanged: (value) {
-                    novaQuantidade = int.tryParse(value) ?? novaQuantidade;
+                    novaQuantidade = double.tryParse(value) ?? novaQuantidade;
                   },
                 ),
                 const SizedBox(height: 8),
@@ -312,7 +318,7 @@ class _ItemsState extends State<Items> {
                   onPressed: _decrementQuantity,
                 ),
                 Text(
-                  '$quantidade',
+                  '${(quantidade % 1 == 0) ? quantidade.toInt() : quantidade.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 16),
                 ),
                 IconButton(
@@ -330,20 +336,17 @@ class _ItemsState extends State<Items> {
             width: 90,
             child: Text(
               formatarValor(valorTotal),
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.end,
             ),
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert),  // Ícone de três pontinhos
+            icon: const Icon(Icons.more_vert), // Ícone de três pontinhos
             onSelected: (String result) {
               // Ação quando uma opção for selecionada
               if (result == 'Editar') {
-                print("Opção 1 selecionada");
                 _showEditDialog();
               } else if (result == 'Remover') {
-                print("Opção 2 selecionada");
                 _confirmDelete();
               }
             },
