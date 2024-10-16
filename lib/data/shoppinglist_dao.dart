@@ -1,5 +1,5 @@
-import 'package:Lista_Compras_Flutter/Data/database.dart';
-import 'package:Lista_Compras_Flutter/components/shopping_list.dart';
+import 'package:lista_compras_flutter/Data/database.dart';
+import 'package:lista_compras_flutter/components/shopping_list.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ShoppingListDao {
@@ -19,7 +19,7 @@ class ShoppingListDao {
   static const String _dateHours = 'SPL_DateHours';
   static const String _image = 'SPL_Image';
 
-  save(ShoppingList aList) async {
+  Future<int> save(ShoppingList aList) async {
     final Database bancoDados = await getDataBase();
     Map<String, dynamic> listMap = toMap(aList);
     return await bancoDados.insert(_tableName, listMap);
@@ -42,12 +42,7 @@ class ShoppingListDao {
     return toList(result);
   }
 
-  Future<int> update(int aIdList,
-      {int? newQty,
-      String? newName,
-      int? newColor,
-      String? newDateHours,
-      String? newImage}) async {
+  Future<int> update(int aIdList, {int? newQty, String? newName, int? newColor, String? newDateHours, String? newImage}) async {
     final Database bancoDados = await getDataBase();
 
     // Cria uma lista para armazenar os valores a serem atualizados

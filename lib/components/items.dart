@@ -1,8 +1,8 @@
 // arquivo: lib/components/items.dart
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:Lista_Compras_Flutter/components/shopping_list.dart';
-import 'package:Lista_Compras_Flutter/data/items_dao.dart';
+import 'package:lista_compras_flutter/components/shopping_list.dart';
+import 'package:lista_compras_flutter/data/items_dao.dart';
 import '../data/shoppinglist_dao.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
@@ -17,9 +17,33 @@ class Items extends StatefulWidget {
   final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
 
-  const Items(this.idItem, this.idList, this.nomeItem, this.qtdItem,
-      this.valorItem, this.valorTotalItem, this.orderItem,
-      {super.key, this.onUpdate, this.onDelete});
+  const Items({this.idItem, required this.idList, required this.nomeItem, required this.qtdItem,
+      required this.valorItem, required this.valorTotalItem, required this.orderItem,
+      super.key, this.onUpdate, this.onDelete});
+
+  factory Items.fromMap(Map<String, dynamic> map) {
+    return Items(
+      idItem: map['_idItem'],
+      idList: map['_idList'],
+      nomeItem: map['_item'],
+      qtdItem: (map['_qty'] as num).toDouble(),
+      valorItem: (map['_value'] as num?)?.toDouble() ?? 0.0,
+      valorTotalItem: (map['_totalValue'] as num?)?.toDouble() ?? 0.0,
+      orderItem: map['_orderItem'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_idItem': idItem,
+      '_idList': idList,
+      '_item': nomeItem,
+      '_qty': qtdItem,
+      '_value': valorItem,
+      '_totalValue': valorTotalItem,
+      '_orderItem': orderItem,
+    };
+  }
 
   @override
   State<Items> createState() => _ItemsState();
@@ -272,6 +296,8 @@ class _ItemsState extends State<Items> {
       }
     }
   }
+
+
 
   @override
   void dispose() {

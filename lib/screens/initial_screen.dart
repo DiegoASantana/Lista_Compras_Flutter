@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:Lista_Compras_Flutter/components/shopping_list.dart';
-import 'package:Lista_Compras_Flutter/data/shoppinglist_dao.dart';
-import 'package:Lista_Compras_Flutter/screens/form_newlist.dart';
-import 'package:Lista_Compras_Flutter/screens/list_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:lista_compras_flutter/components/items.dart';
+import 'package:lista_compras_flutter/components/shopping_list.dart';
+import 'package:lista_compras_flutter/data/items_dao.dart';
+import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
+import 'package:lista_compras_flutter/screens/form_newlist.dart';
+import 'package:lista_compras_flutter/screens/list_screen.dart';
 
 class InitialScreen extends StatefulWidget {
   const InitialScreen({super.key});
@@ -27,6 +32,107 @@ class _InitialScreenState extends State<InitialScreen> {
     });
   }
 
+  Future<void> _importList() async {
+    TextEditingController controller = TextEditingController();
+    bool success = false;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Importar Lista'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Cole o JSON da lista aqui',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 10,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Cancelar
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                String input = controller.text;
+                try {
+                  // Parse o JSON
+                  Map<String, dynamic> jsonData = jsonDecode(input);
+
+                  // Extrair o nome da lista
+                  String nameList = jsonData['nomeLista'];
+                  int qtyItems = jsonData['QtdItens'];
+                  int idColor = jsonData['IdColor'];
+                  List<dynamic> itemsJson = jsonData['itens'];
+
+                  // Gerar a data atual
+                  String dateHour =
+                      DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now());
+
+                  // Inserir a nova lista no banco de dados
+                  int newListId = await ShoppingListDao().save(
+                    ShoppingList(null, nameList, qtyItems, idColor, dateHour, null),
+                  );
+
+                  // Inserir os itens no banco de dados
+                  for (var itemJson in itemsJson) {
+                    // Extrair os campos do item
+                    String nomeItem = itemJson['_item'];
+                    double qtdItem = (itemJson['_qty'] as num).toDouble();
+                    double valorItem =
+                        (itemJson['_value'] as num).toDouble();
+                    double valorTotalItem =
+                        (itemJson['_totalValue'] as num).toDouble();
+                    int orderItem = itemJson['_orderItem'];
+
+                    // Criar uma instância de Item
+                    Items newItem = Items(
+                      idItem: null,
+                      idList: newListId,
+                      nomeItem: nomeItem,
+                      qtdItem: qtdItem,
+                      valorItem: valorItem,
+                      valorTotalItem: valorTotalItem,
+                      orderItem: orderItem,
+                    );
+
+                    // Inserir o item no banco de dados
+                    await ItemsDao().save(newItem);
+                  }
+
+                  success = true;
+                  Navigator.pop(context); // Fechar diálogo
+                } catch (e) {
+                  // Tratar erro de parsing ou de inserção
+                  setState(() {
+                    _loadLists();
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao importar lista: $e')),
+                  );
+                }
+              },
+              child: const Text('Importar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (success) {
+      setState(() {
+        _loadLists();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lista importada com sucesso!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,13 +141,28 @@ class _InitialScreenState extends State<InitialScreen> {
         foregroundColor: Colors.white,
         leading: Container(),
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _loadLists();
-              });
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (int result) {
+              if (result == 1) {
+                _importList();
+              }
             },
-            icon: const Icon(Icons.refresh, size: 30),
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+              const PopupMenuItem<int>(
+                value: 1,
+                child: ListTile(
+                  leading: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 20,
+                  ),
+                  title: Text('Importar Lista'),
+                  dense: true, // Reduz o espaçamento vertical
+                  contentPadding: EdgeInsets.zero, // Remove o padding padrão
+                ),
+              ),
+            ],
           )
         ],
         title: const Text(

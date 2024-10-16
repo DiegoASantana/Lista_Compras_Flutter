@@ -1,5 +1,5 @@
-import 'package:Lista_Compras_Flutter/data/items_dao.dart';
-import 'package:Lista_Compras_Flutter/data/shoppinglist_dao.dart';
+import 'package:lista_compras_flutter/data/items_dao.dart';
+import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 

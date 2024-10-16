@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:Lista_Compras_Flutter/data/items_dao.dart';
-import 'package:Lista_Compras_Flutter/data/shoppinglist_dao.dart';
+import 'package:lista_compras_flutter/data/items_dao.dart';
+import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
+import 'package:share_plus/share_plus.dart';
+
+import 'items.dart';
 
 class ShoppingList extends StatefulWidget {
   final int? idList;
@@ -88,6 +92,14 @@ class _ShoppingListState extends State<ShoppingList> {
                 onTap: () async {
                   Navigator.pop(context);
                   await _confirmDelete();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share, color: Colors.green),
+                title: const Text('Compartilhar Lista'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _shareList();
                 },
               ),
             ],
@@ -239,6 +251,28 @@ class _ShoppingListState extends State<ShoppingList> {
           },
         );
       },
+    );
+  }
+
+  Future<void> _shareList() async {
+    // Buscar os itens da lista a partir do banco de dados
+    List<Items> items = await ItemsDao().findAllByIdList(widget.idList!);
+
+    // Criar um mapa representando a lista
+    Map<String, dynamic> listaMap = {
+      'nomeLista': widget.nameList,
+      'QtdItens':widget.quantityItems,
+      'IdColor':widget.idColor,
+      'itens': items.map((item) => item.toMap()).toList(),
+    };
+
+    // Converter o mapa para JSON
+    String listaJson = jsonEncode(listaMap);
+
+    // Compartilhar o JSON via aplicativos disponíveis (como WhatsApp)
+    await Share.share(
+      listaJson,
+      subject: 'Minha Lista de Compras: ${widget.nameList}',
     );
   }
 

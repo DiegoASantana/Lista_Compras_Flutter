@@ -1,4 +1,4 @@
-name: Lista_Compras_Flutter
+name: lista_compras_flutter
 description: "App para criação de listas de compras"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -41,6 +41,9 @@ dependencies:
   intl: ^0.17.0
   mask_text_input_formatter: ^2.9.0
   flutter_multi_formatter: ^2.13.0
+  in_app_purchase: ^3.2.0
+  shared_preferences: ^2.3.2
+  share_plus: ^10.0.3
 
 dev_dependencies:
   flutter_test:

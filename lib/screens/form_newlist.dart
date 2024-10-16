@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:Lista_Compras_Flutter/components/shopping_list.dart';
-import 'package:Lista_Compras_Flutter/data/shoppinglist_dao.dart';
+import 'package:lista_compras_flutter/components/shopping_list.dart';
+import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 
 class FormNewlist extends StatefulWidget {
   final BuildContext listContext;

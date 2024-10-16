@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
-import 'package:Lista_Compras_Flutter/components/items.dart';
-import 'package:Lista_Compras_Flutter/data/items_dao.dart';
-import 'package:Lista_Compras_Flutter/data/shoppinglist_dao.dart';
+import 'package:lista_compras_flutter/components/items.dart';
+import 'package:lista_compras_flutter/data/items_dao.dart';
+import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 
 class ListScreen extends StatefulWidget {
   final String nomeLista;
@@ -43,13 +43,13 @@ class _ListScreenState extends State<ListScreen> {
     final int orderItem = await ItemsDao().findOrderItemMax(widget.idList);
     final int qtdItemsAtualizado;
     Items newItem = Items(
-      null,
-      widget.idList,
-      nome,
-      qtd,
-      valor,
-      qtd * valor,
-      orderItem,
+      idItem: null,
+      idList: widget.idList,
+      nomeItem: nome,
+      qtdItem: qtd,
+      valorItem: valor,
+      valorTotalItem: qtd * valor,
+      orderItem: orderItem,
     );
     await ItemsDao().save(newItem);
 
@@ -107,15 +107,16 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> _confirmZerar(int aIdParam) async {
     String msg = '';
     String msgSnackBar = '';
-    if (aIdParam == 1){
+    if (aIdParam == 1) {
       msg = 'Deseja zerar todos os Valores?';
       msgSnackBar = 'Zerando todos os valores...';
-    } if (aIdParam == 2){
-      msg = 'Deseja zerar todas as Quantidades?';
-      msgSnackBar = 'Zerando todas as quantidades...';
-    }else if (aIdParam == 3){
-      msg = 'Deseja zerar todos Valores e todas as Quantidades?';
-      msgSnackBar = 'Zerando todos os valores e quantidades';
+    }
+    if (aIdParam == 2) {
+      msg = 'Resetar todas as Quantidades?';
+      msgSnackBar = 'Resetando todas as quantidades...';
+    } else if (aIdParam == 3) {
+      msg = 'Deseja zerar todos Valores e resetar todas as Quantidades?';
+      msgSnackBar = 'Zerando todos os valores e resetando as quantidades...';
     }
     bool? confirm = await showDialog<bool>(
       context: context,
@@ -145,7 +146,9 @@ class _ListScreenState extends State<ListScreen> {
     );
 
     if (confirm == true) {
-      await ItemsDao().updateZeraValuesByIdList(widget.idList, aIdParam).then((_) {
+      await ItemsDao()
+          .updateResetValuesByIdList(widget.idList, aIdParam)
+          .then((_) {
         setState(() {
           _loadItems();
         });
@@ -164,35 +167,44 @@ class _ListScreenState extends State<ListScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),  // Ícone de três pontinhos
-            onSelected: (String result) {
-              // Ação quando uma opção for selecionada
-              if (result == 'Zerar Valores') {
-                _confirmZerar(1);
-              } else if (result == 'Zerar Quantidade') {
-                _confirmZerar(2);
-              } else if (result == 'Zerar Tudo') {
-                _confirmZerar(3);
-              }
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.more_vert), // Ícone de três pontinhos
+            onSelected: (int result) {
+              _confirmZerar(result);
             },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'Zerar Valores',
-                child: Text('Zerar Valores'),
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+              const PopupMenuItem<int>(
+                value: 1,
+                child: ListTile(
+                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  title: Text('Resetar Valores'),
+                  dense: true, // Reduz o espaçamento vertical
+                  contentPadding: EdgeInsets.zero, // Remove o padding padrão
+                ),
               ),
-              const PopupMenuItem<String>(
-                value: 'Zerar Quantidade',
-                child: Text('Zerar Quantidade'),
+              const PopupMenuItem<int>(
+                value: 2,
+                child: ListTile(
+                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  title: Text('Resetar Quantidades'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
-              const PopupMenuItem<String>(
-                value: 'Zerar Tudo',
-                child: Text('Zerar Tudo'),
+              const PopupMenuItem<int>(
+                value: 3,
+                child: ListTile(
+                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  title: Text('Resetar Tudo'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
             ],
           )
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 70),
         child: Container(
@@ -222,13 +234,13 @@ class _ListScreenState extends State<ListScreen> {
                     final Items item = allItems[index];
                     return Items(
                       key: Key('$index'),
-                      item.idItem,
-                      item.idList,
-                      item.nomeItem,
-                      item.qtdItem,
-                      item.valorItem,
-                      item.valorTotalItem,
-                      item.orderItem,
+                      idItem: item.idItem,
+                      idList: item.idList,
+                      nomeItem: item.nomeItem,
+                      qtdItem: item.qtdItem,
+                      valorItem: item.valorItem,
+                      valorTotalItem: item.valorTotalItem,
+                      orderItem: item.orderItem,
                       onUpdate: () {
                         setState(() {
                           _loadItems();

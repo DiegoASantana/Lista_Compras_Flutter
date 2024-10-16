@@ -1,5 +1,5 @@
-import 'package:Lista_Compras_Flutter/Data/database.dart';
-import 'package:Lista_Compras_Flutter/components/items.dart';
+import 'package:lista_compras_flutter/Data/database.dart';
+import 'package:lista_compras_flutter/components/items.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ItemsDao {
@@ -88,7 +88,7 @@ class ItemsDao {
     );
   }
 
-  updateZeraValuesByIdList(int aIdList, aIdParams) async {
+  updateResetValuesByIdList(int aIdList, aIdParams) async {
     final Database bancoDados = await getDataBase();
     final List<Object?> values = [];
     final StringBuffer query = StringBuffer('UPDATE $_tableName SET ');
@@ -96,9 +96,9 @@ class ItemsDao {
     if(aIdParams == 1){
       query.write('$_value = 0, $_totalValue = 0');
     }else if(aIdParams == 2){
-      query.write('$_qty = 0, $_totalValue = 0');
+      query.write('$_qty = 1, $_totalValue = 0');
     }else if(aIdParams == 3){
-      query.write('$_value = 0, $_qty = 0, $_totalValue = 0');
+      query.write('$_value = 0, $_qty = 1, $_totalValue = 0');
     }
 
     query.write(' WHERE $_idList = ?');
@@ -185,8 +185,8 @@ class ItemsDao {
   List<Items> toList(List<Map<String, dynamic>> aItemsMap) {
     final List<Items> listItems = [];
     for (var linha in aItemsMap) {
-      final Items item = Items(linha[_idItem], linha[_idList], linha[_item],
-          linha[_qty], linha[_value], linha[_totalValue], linha[_orderItem]);
+      final Items item = Items(idItem: linha[_idItem], idList: linha[_idList], nomeItem: linha[_item],
+          qtdItem: linha[_qty], valorItem: linha[_value], valorTotalItem: linha[_totalValue], orderItem: linha[_orderItem]);
       listItems.add(item);
     }
     return listItems;

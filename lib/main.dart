@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Lista_Compras_Flutter/screens/initial_screen.dart';
+import 'package:lista_compras_flutter/screens/initial_screen.dart';
 
 void main() {
   runApp(const MyApp());
