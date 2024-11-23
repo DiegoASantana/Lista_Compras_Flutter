@@ -14,12 +14,22 @@ class Items extends StatefulWidget {
   final double valorItem;
   final double valorTotalItem;
   final int orderItem;
+  final bool isMarked;
   final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
 
-  const Items({this.idItem, required this.idList, required this.nomeItem, required this.qtdItem,
-      required this.valorItem, required this.valorTotalItem, required this.orderItem,
-      super.key, this.onUpdate, this.onDelete});
+  const Items(
+      {this.idItem,
+      required this.idList,
+      required this.nomeItem,
+      required this.qtdItem,
+      required this.valorItem,
+      required this.valorTotalItem,
+      required this.orderItem,
+      required this.isMarked,
+      super.key,
+      this.onUpdate,
+      this.onDelete});
 
   factory Items.fromMap(Map<String, dynamic> map) {
     return Items(
@@ -30,6 +40,7 @@ class Items extends StatefulWidget {
       valorItem: (map['_value'] as num?)?.toDouble() ?? 0.0,
       valorTotalItem: (map['_totalValue'] as num?)?.toDouble() ?? 0.0,
       orderItem: map['_orderItem'] as int? ?? 0,
+      isMarked: map['_isMarked'],
     );
   }
 
@@ -42,6 +53,7 @@ class Items extends StatefulWidget {
       '_value': valorItem,
       '_totalValue': valorTotalItem,
       '_orderItem': orderItem,
+      '_isMarked': isMarked,
     };
   }
 
@@ -54,6 +66,7 @@ class _ItemsState extends State<Items> {
   late double quantidade;
   late double valorUnitario;
   late double valorTotal;
+  late bool isMarked;
 
   final TextEditingController _valorController = TextEditingController();
 
@@ -64,6 +77,7 @@ class _ItemsState extends State<Items> {
     quantidade = widget.qtdItem;
     valorUnitario = widget.valorItem;
     valorTotal = widget.valorTotalItem;
+    isMarked = widget.isMarked;
     _valorController.text = valorUnitario.toStringAsFixed(2);
   }
 
@@ -101,15 +115,13 @@ class _ItemsState extends State<Items> {
     }
   }
 
-  Future<void> _updateItem() async {
+  Future<void> _updateQtdItem() async {
     ItemsDao()
         .update(
       widget.idItem!,
-      aNameItem: widget.nomeItem,
       aQtdItem: quantidade,
       aValueUnit: valorUnitario,
       aValueTotal: valorUnitario * quantidade,
-      aOrdemItem: widget.orderItem,
     )
         .then((_) {
       if (widget.onUpdate != null) {
@@ -123,7 +135,7 @@ class _ItemsState extends State<Items> {
       quantidade += 1;
       valorTotal = quantidade * valorUnitario;
     });
-    _updateItem();
+    _updateQtdItem();
   }
 
   void _decrementQuantity() {
@@ -132,7 +144,7 @@ class _ItemsState extends State<Items> {
         quantidade -= 1;
         valorTotal = quantidade * valorUnitario;
       });
-      _updateItem();
+      _updateQtdItem();
     }
   }
 
@@ -151,8 +163,6 @@ class _ItemsState extends State<Items> {
     String novoNome = widget.nomeItem;
     double novaQuantidade = quantidade;
     double novoValorUnitario = valorUnitario;
-
-
 
     showDialog(
       context: context,
@@ -176,8 +186,9 @@ class _ItemsState extends State<Items> {
                 TextField(
                   decoration: const InputDecoration(labelText: 'Quantidade'),
                   keyboardType: TextInputType.number,
-                  controller:
-                      TextEditingController(text: '${(novaQuantidade % 1 == 0) ? novaQuantidade.toInt() : novaQuantidade}'),
+                  controller: TextEditingController(
+                      text:
+                          '${(novaQuantidade % 1 == 0) ? novaQuantidade.toInt() : novaQuantidade}'),
                   onChanged: (value) {
                     novaQuantidade = double.tryParse(value) ?? novaQuantidade;
                   },
@@ -271,18 +282,18 @@ class _ItemsState extends State<Items> {
           actions: [
             TextButton(
               onPressed: () {
+                Navigator.pop(context, false); // Não confirma
+              },
+              child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () {
                 Navigator.pop(context, true); // Confirma
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Removendo Item...')),
                 );
               },
               child: const Text('Sim'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false); // Não confirma
-              },
-              child: const Text('Não'),
             ),
           ],
         );
@@ -297,8 +308,6 @@ class _ItemsState extends State<Items> {
     }
   }
 
-
-
   @override
   void dispose() {
     _valorController.dispose();
@@ -307,88 +316,167 @@ class _ItemsState extends State<Items> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.black, width: 2),
+    return Stack(
+      children: [
+        // Container principal (item)
+        Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(color: Colors.black, width: 2),
+            ),
+          ),
+          padding: const EdgeInsets.all(10),
+          child: DefaultTextStyle(
+            style: TextStyle(color: (widget.isMarked) ? Colors.grey : Colors.black),
+            child: IconTheme(
+              data: IconThemeData(color: (widget.isMarked) ? Colors.grey : Colors.black),
+              child: Row(
+                children: [
+                  // Nome do Item
+                  Expanded(
+                    flex: 3,
+                    child: InkWell(
+                      onTap: _showDialogNameItem,
+                      child: Text(
+                        widget.nomeItem,
+                        style: const TextStyle(
+                            fontSize: 20, overflow: TextOverflow.ellipsis),
+                        maxLines: 3,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 130,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove,
+                            size: 16,
+                          ),
+                          onPressed: _decrementQuantity,
+                        ),
+                        Text(
+                          '${(quantidade % 1 == 0) ? quantidade.toInt() : quantidade.toStringAsFixed(2)}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.add,
+                            size: 16,
+                          ),
+                          onPressed: _incrementQuantity,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Valor Total
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        isMarked = !isMarked; // Alterna o estado
+                        ItemsDao()
+                            .update(
+                          widget.idItem!,
+                          aIsMarked: isMarked,
+                        )
+                            .then((_) {
+                          if (widget.onUpdate != null) {
+                            widget.onUpdate!();
+                          }
+                        });
+                      });
+                    },
+                    child: SizedBox(
+                      width: 90,
+                      child: Text(
+                        formatarValor(valorTotal),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert), // Ícone de três pontinhos
+                    onSelected: (String result) {
+                      // Ação quando uma opção for selecionada
+                      if (result == 'Editar') {
+                        _showEditDialog();
+                      } else if (result == 'Remover') {
+                        _confirmDelete();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Editar',
+                        child: Text('Editar'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Remover',
+                        child: Text('Remover'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: [
-          // Nome do Item
-          Expanded(
-            flex: 3,
-            child: InkWell(
-              onTap: _showDialogNameItem,
-              child: Text(
-                widget.nomeItem,
-                style: const TextStyle(
-                    fontSize: 20, overflow: TextOverflow.ellipsis),
-                maxLines: 3,
+        // Camada preta semi-transparente
+        if (isMarked) // Mostra apenas se `isMarked` for verdadeiro
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  isMarked = false; // Desmarca ao clicar na camada
+                });
+                ItemsDao()
+                    .update(
+                  widget.idItem!,
+                  aIsMarked: isMarked,
+                )
+                    .then((_) {
+                  if (widget.onUpdate != null) {
+                    widget.onUpdate!();
+                  }
+                });
+              },
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+                // Camada semi-transparente
+                child: CustomPaint(
+                  painter: _StrikeThroughPainter(), // Risco horizontal
+                ),
               ),
             ),
           ),
-          SizedBox(
-            width: 130,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.remove,
-                    size: 16,
-                  ),
-                  onPressed: _decrementQuantity,
-                ),
-                Text(
-                  '${(quantidade % 1 == 0) ? quantidade.toInt() : quantidade.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.add,
-                    size: 16,
-                  ),
-                  onPressed: _incrementQuantity,
-                ),
-              ],
-            ),
-          ),
-          // Valor Total
-          SizedBox(
-            width: 90,
-            child: Text(
-              formatarValor(valorTotal),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.end,
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert), // Ícone de três pontinhos
-            onSelected: (String result) {
-              // Ação quando uma opção for selecionada
-              if (result == 'Editar') {
-                _showEditDialog();
-              } else if (result == 'Remover') {
-                _confirmDelete();
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'Editar',
-                child: Text('Editar'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'Remover',
-                child: Text('Remover'),
-              ),
-            ],
-          )
-        ],
-      ),
+      ],
     );
+  }
+}
+
+class _StrikeThroughPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = Colors.black // Cor do risco
+      ..strokeWidth = 2 // Espessura do risco
+      ..style = PaintingStyle.stroke; // Para desenhar uma linha
+
+    // Desenha o risco no meio do Container
+    canvas.drawLine(
+      Offset(0, size.height / 2), // Começo do risco (na metade superior)
+      Offset(size.width, size.height / 2), // Fim do risco (na metade inferior)
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false; // Não precisa redesenhar o risco
   }
 }

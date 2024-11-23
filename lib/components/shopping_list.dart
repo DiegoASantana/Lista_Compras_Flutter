@@ -29,9 +29,9 @@ class ShoppingList extends StatefulWidget {
 
 class _ShoppingListState extends State<ShoppingList> {
   final Map<int, Color> colorOptions = {
-    1: Colors.red,
+    1: Colors.blue,
     2: Colors.green,
-    3: Colors.blue,
+    3: Colors.red,
     4: Colors.yellow,
     5: Colors.purple,
   };
@@ -48,15 +48,15 @@ class _ShoppingListState extends State<ShoppingList> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context, true); // Confirma
-              },
-              child: const Text('Sim'),
-            ),
-            TextButton(
-              onPressed: () {
                 Navigator.pop(context, false); // Não confirma
               },
               child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true); // Confirma
+              },
+              child: const Text('Sim'),
             ),
           ],
         );
@@ -151,7 +151,7 @@ class _ShoppingListState extends State<ShoppingList> {
                               File(novaFoto!),
                               fit: BoxFit.cover,
                             )
-                          : Image.asset('assets/images/noPhoto.png',
+                          : Image.asset('assets/images/lista_icon.png',
                               fit: BoxFit.cover),
                     ),
                     const SizedBox(height: 8),
@@ -313,9 +313,8 @@ class _ShoppingListState extends State<ShoppingList> {
                                     File(widget.image!),
                                     fit: BoxFit.cover,
                                   )
-                                : Image.asset('assets/images/noPhoto.png',
-                                    fit: BoxFit
-                                        .cover)), // Corrigido para usar uma imagem padrão se vazio
+                                : Image.asset('assets/images/lista_icon.png',
+                                    fit: BoxFit.cover)), // Corrigido para usar uma imagem padrão se vazio
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -348,6 +347,12 @@ class _ShoppingListState extends State<ShoppingList> {
                                             'Deseja remover esta lista?'),
                                         actions: [
                                           TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context, 'Não');
+                                            },
+                                            child: const Text('Não'),
+                                          ),
+                                          TextButton(
                                             onPressed: () async {
                                               await ItemsDao().deleteByIdList(
                                                   widget.idList!);
@@ -360,12 +365,6 @@ class _ShoppingListState extends State<ShoppingList> {
                                             },
                                             child: const Text('Sim'),
                                           ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context, 'Não');
-                                            },
-                                            child: const Text('Não'),
-                                          )
                                         ],
                                       );
                                     });

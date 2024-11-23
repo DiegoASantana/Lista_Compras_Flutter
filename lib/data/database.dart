@@ -8,14 +8,15 @@ Future<Database> getDataBase() async {
   return openDatabase(
     path,
     onCreate: (db, version) {
+      // Criação inicial do banco na versão 1
       db.execute(ShoppingListDao.tableSql);
       db.execute(ItemsDao.tableSql);
     },
-    version: 2,
+    version: 3,
     onUpgrade: (db, oldVersion, newVersion) async {
       if (oldVersion < 2) {
-        // Se precisar fazer upgrades, como adicionar tabelas ou campos
-        await db.execute(ItemsDao.tableSql);
+        // Alterações específicas da versão 2
+        await db.execute('ALTER TABLE Items ADD COLUMN isMarked INTEGER DEFAULT 0');
       }
     },
   );

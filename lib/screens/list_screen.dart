@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:lista_compras_flutter/components/items.dart';
+import 'package:lista_compras_flutter/components/utilities_functions.dart';
 import 'package:lista_compras_flutter/data/items_dao.dart';
 import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 
 class ListScreen extends StatefulWidget {
   final String nomeLista;
   final int idList;
+  final bool isPremiumUser;
 
-  const ListScreen(this.idList, {super.key, required this.nomeLista});
+  const ListScreen(this.idList, {super.key, required this.nomeLista, required this.isPremiumUser});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -50,6 +52,7 @@ class _ListScreenState extends State<ListScreen> {
       valorItem: valor,
       valorTotalItem: qtd * valor,
       orderItem: orderItem,
+      isMarked: false,
     );
     await ItemsDao().save(newItem);
 
@@ -78,6 +81,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> _reorderItems(int oldIndex, int newIndex) async {
+
     setState(() {
       if (oldIndex < newIndex) {
         newIndex -= 1;
@@ -105,6 +109,11 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> _confirmZerar(int aIdParam) async {
+    if (!widget.isPremiumUser) {
+      // Bloqueia o recurso se o usuário não for premium
+      Dialogs.showPremiumRequiredDialog(context);
+      return;
+    }
     String msg = '';
     String msgSnackBar = '';
     if (aIdParam == 1) {
@@ -241,6 +250,7 @@ class _ListScreenState extends State<ListScreen> {
                       valorItem: item.valorItem,
                       valorTotalItem: item.valorTotalItem,
                       orderItem: item.orderItem,
+                      isMarked: item.isMarked,
                       onUpdate: () {
                         setState(() {
                           _loadItems();

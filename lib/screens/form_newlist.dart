@@ -18,15 +18,15 @@ class _FormNewlistState extends State<FormNewlist> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameListController = TextEditingController();
   String? imagePath;
-  int? selectedColorId;
+  int selectedColorId = 1;
 
   final ImagePicker _picker = ImagePicker();
 
   // Mapeamento de ID para cores
   final Map<int, Color> colorOptions = {
-    1: Colors.red,
+    1: Colors.blue,
     2: Colors.green,
-    3: Colors.blue,
+    3: Colors.red,
     4: Colors.yellow,
     5: Colors.purple,
   };
@@ -112,7 +112,7 @@ class _FormNewlistState extends State<FormNewlist> {
                         width: 110,
                         height: 110,
                         decoration: BoxDecoration(
-                            color: Colors.blue,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(width: 2, color: Colors.blue)),
                         child: (imagePath != null)
@@ -120,8 +120,8 @@ class _FormNewlistState extends State<FormNewlist> {
                                 File(imagePath!),
                                 fit: BoxFit.cover,
                               )
-                            : Image.asset('assets/images/noPhoto.png',
-                                fit: BoxFit.cover)),
+                            : Image.asset('assets/images/lista_icon.png',
+                                fit: BoxFit.contain)),
                     Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
@@ -159,7 +159,7 @@ class _FormNewlistState extends State<FormNewlist> {
                                 }).toList(),
                                 onChanged: (int? newValue) {
                                   setState(() {
-                                    selectedColorId = newValue;
+                                    selectedColorId = newValue!;
                                   });
                                 },
                                 validator: (value) {

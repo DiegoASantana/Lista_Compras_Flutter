@@ -11,6 +11,7 @@ class ItemsDao {
       '$_value REAL, '
       '$_totalValue REAL, '
       '$_orderItem INTEGER NOT NULL, '
+      '$_isMarked INTEGER DEFAULT 0, '
       'FOREIGN KEY($_idList) REFERENCES  ShoppingList(SPL_IdList))';
 
   static const String _tableName = 'Items';
@@ -21,6 +22,7 @@ class ItemsDao {
   static const String _value = 'ITM_Value';
   static const String _totalValue = 'ITM_TotalValue';
   static const String _orderItem = 'ITM_OrderItem';
+  static const String _isMarked = 'ITM_IsMarked';
 
   save(Items aItem) async {
     final Database bancoDados = await getDataBase();
@@ -98,7 +100,7 @@ class ItemsDao {
     }else if(aIdParams == 2){
       query.write('$_qty = 1, $_totalValue = 0');
     }else if(aIdParams == 3){
-      query.write('$_value = 0, $_qty = 1, $_totalValue = 0');
+      query.write('$_value = 0, $_qty = 1, $_totalValue = 0, $_isMarked = 0');
     }
 
     query.write(' WHERE $_idList = ?');
@@ -115,7 +117,8 @@ class ItemsDao {
       double? aQtdItem,
       double? aValueUnit,
       double? aValueTotal,
-      int? aOrdemItem}) async {
+      int? aOrdemItem,
+      bool? aIsMarked}) async {
     final Database bancoDados = await getDataBase();
 
     // Cria uma lista para armazenar os valores a serem atualizados
@@ -153,6 +156,11 @@ class ItemsDao {
       query.write('$_orderItem = ?');
       values.add(aOrdemItem);
     }
+    if (aIsMarked != null) {
+      if (!isFirst) query.write(', ');
+      query.write('$_isMarked = ?');
+      values.add((aIsMarked) ? 1 : 0);
+    }
 
     // Verifica se pelo menos um campo foi passado
     if (values.isEmpty) {
@@ -179,6 +187,7 @@ class ItemsDao {
     itemMap[_value] = aItem.valorItem;
     itemMap[_totalValue] = aItem.valorTotalItem;
     itemMap[_orderItem] = aItem.orderItem;
+    itemMap[_isMarked] = (aItem.isMarked) ? 1 : 0;
     return itemMap;
   }
 
@@ -186,7 +195,7 @@ class ItemsDao {
     final List<Items> listItems = [];
     for (var linha in aItemsMap) {
       final Items item = Items(idItem: linha[_idItem], idList: linha[_idList], nomeItem: linha[_item],
-          qtdItem: linha[_qty], valorItem: linha[_value], valorTotalItem: linha[_totalValue], orderItem: linha[_orderItem]);
+          qtdItem: linha[_qty], valorItem: linha[_value], valorTotalItem: linha[_totalValue], orderItem: linha[_orderItem], isMarked: (linha[_isMarked] == 1) ? true : false,);
       listItems.add(item);
     }
     return listItems;

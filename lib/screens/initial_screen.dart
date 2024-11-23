@@ -4,13 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lista_compras_flutter/components/items.dart';
 import 'package:lista_compras_flutter/components/shopping_list.dart';
+import 'package:lista_compras_flutter/components/utilities_functions.dart';
 import 'package:lista_compras_flutter/data/items_dao.dart';
 import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 import 'package:lista_compras_flutter/screens/form_newlist.dart';
 import 'package:lista_compras_flutter/screens/list_screen.dart';
 
 class InitialScreen extends StatefulWidget {
-  const InitialScreen({super.key});
+  final bool
+      isPremiumUser; // Adicione o parâmetro para receber o status premium
+
+  const InitialScreen({super.key, required this.isPremiumUser});
 
   @override
   State<InitialScreen> createState() => _InitialScreenState();
@@ -33,6 +37,12 @@ class _InitialScreenState extends State<InitialScreen> {
   }
 
   Future<void> _importList() async {
+    if (!widget.isPremiumUser) {
+      // Bloqueia o recurso se o usuário não for premium
+      Dialogs.showPremiumRequiredDialog(context);
+      return;
+    }
+
     TextEditingController controller = TextEditingController();
     bool success = false;
 
@@ -75,7 +85,8 @@ class _InitialScreenState extends State<InitialScreen> {
 
                   // Inserir a nova lista no banco de dados
                   int newListId = await ShoppingListDao().save(
-                    ShoppingList(null, nameList, qtyItems, idColor, dateHour, null),
+                    ShoppingList(
+                        null, nameList, qtyItems, idColor, dateHour, null),
                   );
 
                   // Inserir os itens no banco de dados
@@ -83,11 +94,11 @@ class _InitialScreenState extends State<InitialScreen> {
                     // Extrair os campos do item
                     String nomeItem = itemJson['_item'];
                     double qtdItem = (itemJson['_qty'] as num).toDouble();
-                    double valorItem =
-                        (itemJson['_value'] as num).toDouble();
+                    double valorItem = (itemJson['_value'] as num).toDouble();
                     double valorTotalItem =
                         (itemJson['_totalValue'] as num).toDouble();
                     int orderItem = itemJson['_orderItem'];
+                    bool isMarked = itemJson['_isMaked'];
 
                     // Criar uma instância de Item
                     Items newItem = Items(
@@ -98,6 +109,7 @@ class _InitialScreenState extends State<InitialScreen> {
                       valorItem: valorItem,
                       valorTotalItem: valorTotalItem,
                       orderItem: orderItem,
+                      isMarked: isMarked,
                     );
 
                     // Inserir o item no banco de dados
@@ -171,8 +183,8 @@ class _InitialScreenState extends State<InitialScreen> {
         ),
       ),
       body: Container(
-        color: Colors.black12, // Cor do fundo para todo o body
-        width: double.infinity, // Preencher toda a largura
+        color: Colors.black12,
+        width: double.infinity,
         height: double.infinity,
         child: Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 70),
@@ -199,14 +211,13 @@ class _InitialScreenState extends State<InitialScreen> {
                     final ShoppingList list = allLists[index];
                     return GestureDetector(
                       onTap: () {
-                        // Navegar para o ListScreen e passar o nome da lista clicada
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ListScreen(
                               list.idList!,
-                              nomeLista:
-                                  list.nameList, // Passando o nome da lista
+                              nomeLista: list.nameList,
+                              isPremiumUser: widget.isPremiumUser,
                             ),
                           ),
                         ).then((_) {
@@ -224,7 +235,7 @@ class _InitialScreenState extends State<InitialScreen> {
                         list.image,
                         onDeleteList: () {
                           setState(() {
-                            _loadLists(); // Recarrega a lista de itens após a exclusão
+                            _loadLists();
                           });
                         },
                         onUpdateList: () {
