@@ -58,5 +58,15 @@ flutter {
 
 dependencies {
     implementation 'com.android.billingclient:billing:7.1.1'
+    implementation 'com.google.android.gms:play-services-ads:23.5.0'
     // Outras dependências existentes (se houver)
 }
+
+allprojects {
+    tasks.withType(JavaCompile).tap {
+        configureEach {
+            options.compilerArgs << "-Xlint:deprecation"
+        }
+    }
+}
+

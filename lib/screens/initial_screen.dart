@@ -9,6 +9,7 @@ import 'package:lista_compras_flutter/data/items_dao.dart';
 import 'package:lista_compras_flutter/data/shoppinglist_dao.dart';
 import 'package:lista_compras_flutter/screens/form_newlist.dart';
 import 'package:lista_compras_flutter/screens/list_screen.dart';
+import 'package:lista_compras_flutter/components/banners_ad.dart';
 
 class InitialScreen extends StatefulWidget {
   final bool
@@ -186,10 +187,13 @@ class _InitialScreenState extends State<InitialScreen> {
         color: Colors.black12,
         width: double.infinity,
         height: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 70),
-          child: (allLists.isEmpty)
-              ? const Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 10), // Ajuste o espaçamento
+                child: (allLists.isEmpty)
+                    ? const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,7 +209,7 @@ class _InitialScreenState extends State<InitialScreen> {
                     ],
                   ),
                 )
-              : ListView.builder(
+                    : ListView.builder(
                   itemCount: allLists.length,
                   itemBuilder: (BuildContext context, int index) {
                     final ShoppingList list = allLists[index];
@@ -247,28 +251,35 @@ class _InitialScreenState extends State<InitialScreen> {
                     );
                   },
                 ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (contextNew) => FormNewlist(
-                listContext: context,
               ),
             ),
-          ).then((_) {
-            setState(() {
-              _loadLists();
+            const BannerAdWidget(), // Adicione o BannerAdWidget aqui
+          ],
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 40),
+        child: FloatingActionButton(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (contextNew) => FormNewlist(
+                  listContext: context,
+                ),
+              ),
+            ).then((_) {
+              setState(() {
+                _loadLists();
+              });
             });
-          });
-        },
-        child: const Icon(
-          Icons.add,
-          size: 30,
+          },
+          child: const Icon(
+            Icons.add,
+            size: 30,
+          ),
         ),
       ),
     );

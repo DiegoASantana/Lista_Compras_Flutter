@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:intl/intl.dart';
+import 'package:lista_compras_flutter/components/banners_ad.dart';
 import 'package:lista_compras_flutter/components/items.dart';
 import 'package:lista_compras_flutter/components/utilities_functions.dart';
 import 'package:lista_compras_flutter/data/items_dao.dart';
@@ -11,7 +12,8 @@ class ListScreen extends StatefulWidget {
   final int idList;
   final bool isPremiumUser;
 
-  const ListScreen(this.idList, {super.key, required this.nomeLista, required this.isPremiumUser});
+  const ListScreen(this.idList,
+      {super.key, required this.nomeLista, required this.isPremiumUser});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -81,7 +83,6 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> _reorderItems(int oldIndex, int newIndex) async {
-
     setState(() {
       if (oldIndex < newIndex) {
         newIndex -= 1;
@@ -185,7 +186,11 @@ class _ListScreenState extends State<ListScreen> {
               const PopupMenuItem<int>(
                 value: 1,
                 child: ListTile(
-                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  leading: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 20,
+                  ),
                   title: Text('Resetar Valores'),
                   dense: true, // Reduz o espaçamento vertical
                   contentPadding: EdgeInsets.zero, // Remove o padding padrão
@@ -194,7 +199,11 @@ class _ListScreenState extends State<ListScreen> {
               const PopupMenuItem<int>(
                 value: 2,
                 child: ListTile(
-                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  leading: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 20,
+                  ),
                   title: Text('Resetar Quantidades'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -203,7 +212,11 @@ class _ListScreenState extends State<ListScreen> {
               const PopupMenuItem<int>(
                 value: 3,
                 child: ListTile(
-                  leading: Icon(Icons.star, color: Colors.amber, size: 20,),
+                  leading: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 20,
+                  ),
                   title: Text('Resetar Tudo'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -213,9 +226,8 @@ class _ListScreenState extends State<ListScreen> {
           )
         ],
       ),
-
       body: Padding(
-        padding: const EdgeInsets.only(top: 10, bottom: 70),
+        padding: const EdgeInsets.only(bottom: 70),
         child: Container(
           color: Colors.white30,
           width: double.infinity,
@@ -268,27 +280,35 @@ class _ListScreenState extends State<ListScreen> {
                 ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.blue[100],
-          border: const Border(
-            top: BorderSide(color: Colors.blue, width: 2),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              border: const Border(
+                top: BorderSide(color: Colors.blue, width: 2),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Itens: ${allItems.length}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  formatarValor(totalValor),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Total Itens: ${allItems.length}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              formatarValor(totalValor),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+          const BannerAdWidget(), // Adicionado abaixo do bottomNavigationBar
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
