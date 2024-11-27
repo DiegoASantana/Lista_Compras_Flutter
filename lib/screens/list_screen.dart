@@ -110,6 +110,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> _confirmZerar(int aIdParam) async {
+    print(widget.isPremiumUser);
     if (!widget.isPremiumUser) {
       // Bloqueia o recurso se o usuário não for premium
       Dialogs.showPremiumRequiredDialog(context);
@@ -307,7 +308,7 @@ class _ListScreenState extends State<ListScreen> {
               ],
             ),
           ),
-          const BannerAdWidget(), // Adicionado abaixo do bottomNavigationBar
+          BannerAdWidget(isPremiumUser: widget.isPremiumUser), // Adicionado abaixo do bottomNavigationBar
         ],
       ),
       floatingActionButton: FloatingActionButton(

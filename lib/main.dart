@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart'; // Import do pacote de anúncios
 import 'package:lista_compras_flutter/data/premium_service.dart';
 import 'package:lista_compras_flutter/screens/initial_screen.dart';
 

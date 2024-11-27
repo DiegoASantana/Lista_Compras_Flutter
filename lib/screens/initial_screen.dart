@@ -253,7 +253,7 @@ class _InitialScreenState extends State<InitialScreen> {
                 ),
               ),
             ),
-            const BannerAdWidget(), // Adicione o BannerAdWidget aqui
+            BannerAdWidget(isPremiumUser: widget.isPremiumUser), // Adicione o BannerAdWidget aqui
           ],
         ),
       ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+  final bool isPremiumUser;
+
+  const BannerAdWidget({super.key, required this.isPremiumUser});
 
   @override
   BannerAdWidgetState createState() => BannerAdWidgetState();
@@ -15,7 +17,11 @@ class BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _loadBannerAd();
+
+    // Se o usuário não for premium, carregue o banner
+    if (!widget.isPremiumUser) {
+      _loadBannerAd();
+    }
   }
 
   void _loadBannerAd() {
@@ -41,19 +47,28 @@ class BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   void dispose() {
-    _bannerAd.dispose();
+    // Se o banner foi carregado, descarte-o
+    if (_isAdLoaded) {
+      _bannerAd.dispose();
+    }
+
+    // Certifique-se de chamar super.dispose()
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isAdLoaded
-        ? Container(
+    // Se o usuário é premium ou o anúncio não carregou, não mostre nada
+    if (widget.isPremiumUser || !_isAdLoaded) {
+      return const SizedBox(); // Retorna um widget vazio
+    }
+
+    // Renderize o banner
+    return Container(
       alignment: Alignment.center,
       width: _bannerAd.size.width.toDouble(),
       height: _bannerAd.size.height.toDouble(),
       child: AdWidget(ad: _bannerAd),
-    )
-        : const SizedBox();
+    );
   }
 }
